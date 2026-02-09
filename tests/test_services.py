@@ -1,4 +1,3 @@
-import pytest
 import string
 
 from services import generate_short_code

@@ -1,7 +1,7 @@
 from sqlalchemy import select
 
-from database import new_session, TaskOrm
-from schemas import STaskAdd, STask, STaskResponseGet
+from database import TaskOrm, new_session
+from schemas import STask, STaskAdd, STaskResponseGet
 from services import generate_short_code
 
 
@@ -27,7 +27,6 @@ class TaskRepository:
             session.add(task)
             await session.commit()
             return task.short_link
-
 
     @classmethod
     async def get_all(cls) -> list[STask]:
@@ -60,6 +59,5 @@ class TaskRepository:
             if not task_model:
                 return None
             return STaskResponseGet(
-                url=task_model.url,
-                short_link=task_model.short_link
+                url=task_model.url, short_link=task_model.short_link
             )

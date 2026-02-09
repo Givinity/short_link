@@ -1,10 +1,11 @@
-import pytest
+from datetime import datetime
 from unittest.mock import AsyncMock, patch
-from httpx import AsyncClient, ASGITransport
+
+import pytest
+from httpx import ASGITransport, AsyncClient
 
 from main import app
-from schemas import STaskResponseGet, STask
-from datetime import datetime
+from schemas import STask, STaskResponseGet
 
 
 @pytest.fixture
@@ -23,10 +24,7 @@ async def async_client():
 @pytest.fixture
 def mock_task_response_get():
     """Мок ответа get_by_short_link."""
-    return STaskResponseGet(
-        url="https://google.com",
-        short_link="abc123"
-    )
+    return STaskResponseGet(url="https://google.com", short_link="abc123")
 
 
 @pytest.fixture

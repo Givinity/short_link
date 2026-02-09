@@ -5,7 +5,7 @@
 ## Запуск
 
 ```bash
-poetry install
+poetry install --no-root
 poetry run uvicorn main:app --reload
 ```
 
@@ -19,4 +19,17 @@ poetry run uvicorn main:app --reload
 
 ```bash
 poetry run pytest -v
+```
+
+## Линтинг и форматирование
+
+```bash
+# Проверка кода
+poetry run ruff check .
+
+# Автоисправление
+poetry run ruff check . --fix
+
+# Форматирование
+poetry run ruff format .
 ```

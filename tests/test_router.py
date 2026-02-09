@@ -1,8 +1,8 @@
-import pytest
 from unittest.mock import AsyncMock, patch
 
-from schemas import STaskResponseGet
+import pytest
 
+from schemas import STaskResponseGet
 
 pytestmark = pytest.mark.anyio
 
@@ -16,8 +16,7 @@ class TestShortenUrl:
             mock_repo.add_one = AsyncMock(return_value="abc123")
 
             response = await async_client.post(
-                "/api/v1/shorten",
-                params={"url": "https://google.com"}
+                "/api/v1/shorten", params={"url": "https://google.com"}
             )
 
             assert response.status_code == 200
@@ -67,10 +66,7 @@ class TestRedirect:
         with patch("router.TaskRepository") as mock_repo:
             mock_repo.get_by_short_link = AsyncMock(return_value=mock_task_response_get)
 
-            response = await async_client.get(
-                "/abc123",
-                follow_redirects=False
-            )
+            response = await async_client.get("/abc123", follow_redirects=False)
 
             assert response.status_code == 307
             assert response.headers["location"] == "https://google.com"
@@ -89,15 +85,12 @@ class TestRedirect:
         """Добавление https:// если отсутствует."""
         mock_response = STaskResponseGet(
             url="google.com",  # без http
-            short_link="abc123"
+            short_link="abc123",
         )
         with patch("router.TaskRepository") as mock_repo:
             mock_repo.get_by_short_link = AsyncMock(return_value=mock_response)
 
-            response = await async_client.get(
-                "/abc123",
-                follow_redirects=False
-            )
+            response = await async_client.get("/abc123", follow_redirects=False)
 
             assert response.status_code == 307
             assert response.headers["location"] == "https://google.com"

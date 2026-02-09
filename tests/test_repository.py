@@ -1,9 +1,9 @@
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 from repository import TaskRepository
 from schemas import STaskAdd
-
 
 pytestmark = pytest.mark.anyio
 
@@ -20,12 +20,12 @@ class TestTaskRepositoryAddOne:
         # Первый запрос - код существует, второй - нет
         mock_result_exists = MagicMock()
         mock_result_exists.scalar_one_or_none.return_value = MagicMock()  # существует
-        
+
         mock_result_not_exists = MagicMock()
         mock_result_not_exists.scalar_one_or_none.return_value = None  # не существует
 
         mock_session.execute.side_effect = [mock_result_exists, mock_result_not_exists]
-        
+
         # add и commit - синхронные методы
         mock_session.add = MagicMock()
         mock_session.commit = AsyncMock()
@@ -37,8 +37,10 @@ class TestTaskRepositoryAddOne:
             with patch("repository.TaskOrm") as MockTaskOrm:
                 MockTaskOrm.return_value = mock_task
                 MockTaskOrm.short_link = "short_link"
-                
-                with patch("repository.generate_short_code", side_effect=["exists", "abc123"]):
+
+                with patch(
+                    "repository.generate_short_code", side_effect=["exists", "abc123"]
+                ):
                     with patch("repository.select"):
                         data = STaskAdd(url="https://google.com")
                         result = await TaskRepository.add_one(data)
