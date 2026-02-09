@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from database import create_tables, delete_tables
 from router import router as task_router
+from router import redirect_router as redirect_router
 
 
 @asynccontextmanager
@@ -15,3 +16,4 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 app.include_router(task_router)
+app.include_router(redirect_router)

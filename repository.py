@@ -1,19 +1,30 @@
-from database import new_session
-from schemas import STaskAdd
-from database import TaskOrm
 from sqlalchemy import select
-from schemas import STask
+
+from database import new_session, TaskOrm
+from schemas import STaskAdd, STask, STaskResponseGet
+from services import generate_short_code
 
 
 class TaskRepository:
     @classmethod
     async def add_one(cls, data: STaskAdd):
         async with new_session() as session:
-            task_dict = data.model_dump()
-            
-            task = TaskOrm(**task_dict)
+            # Генерируем уникальный short_link
+            while True:
+                short_code = generate_short_code()
+                existing = await session.execute(
+                    select(TaskOrm).where(TaskOrm.short_link == short_code)
+                )
+                if not existing.scalar_one_or_none():
+                    break
+
+            task = TaskOrm(
+                url=data.url,
+                short_link=short_code,
+                is_active=data.is_active,
+                is_deleted=data.is_deleted,
+            )
             session.add(task)
-            await session.flush()
             await session.commit()
             return task.short_link
 
@@ -37,3 +48,18 @@ class TaskRepository:
                 for task in task_models
             ]
             return tasks
+
+    @classmethod
+    async def get_by_short_link(cls, short_link: str):
+        async with new_session() as session:
+            query = select(TaskOrm).where(
+                TaskOrm.short_link == short_link,
+            )
+            result = await session.execute(query)
+            task_model = result.scalar_one_or_none()
+            if not task_model:
+                return None
+            return STaskResponseGet(
+                url=task_model.url,
+                short_link=task_model.short_link
+            )

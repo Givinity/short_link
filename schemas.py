@@ -1,19 +1,14 @@
-from re import S
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 
 
-class ShortLink(BaseModel):
-    short_link: str
-
 class STaskAdd(BaseModel):
     url: str
-    short_link: str
     created_at: Optional[datetime] = datetime.now()
     updated_at: Optional[datetime] = datetime.now()
-    is_active: bool
-    is_deleted: bool
+    is_active: bool = True
+    is_deleted: bool = False
 
 class STask(STaskAdd):
     id: int
@@ -27,3 +22,7 @@ class STask(STaskAdd):
 class STaskResponseAdd(BaseModel):
     ok: bool = True
     task_short_link: str
+
+class STaskResponseGet(BaseModel):
+    url: str
+    short_link: str
