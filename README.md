@@ -5,8 +5,7 @@
 ## Запуск
 
 ```bash
-poetry install --no-root
-poetry run uvicorn main:app --reload
+docker compose up -d
 ```
 
 ## API
@@ -33,3 +32,5 @@ poetry run ruff check . --fix
 # Форматирование
 poetry run ruff format .
 ```
+urls:
+# localhost:8080 - frontend

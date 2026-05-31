@@ -1,0 +1,35 @@
+# Прод Shortly: без 80/443, маршрутизация через внешний Traefik.
+# Запуск: docker compose -f docker-compose.yaml -f docker-compose.prod.yaml up -d --build
+#
+# Traefik должен быть уже запущен: cd docker/traefik && docker compose up -d
+
+services:
+  frontend:
+    ports: !reset []
+    volumes: !reset []
+    networks:
+      - default
+      - proxy
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.shortly.rule=Host(`${SHORTLY_DOMAIN}`)
+      - traefik.http.routers.shortly.entrypoints=websecure
+      - traefik.http.routers.shortly.tls=true
+      - traefik.http.routers.shortly.tls.certresolver=letsencrypt
+      - traefik.http.routers.shortly.service=shortly
+      - traefik.http.services.shortly.loadbalancer.server.port=80
+      - traefik.http.routers.shortly-http.rule=Host(`${SHORTLY_DOMAIN}`)
+      - traefik.http.routers.shortly-http.entrypoints=web
+      - traefik.http.routers.shortly-http.middlewares=shortly-redirect-https
+      - traefik.http.middlewares.shortly-redirect-https.redirectscheme.scheme=https
+      - traefik.http.middlewares.shortly-redirect-https.redirectscheme.permanent=true
+
+  certbot:
+    profiles:
+      - disabled
+
+networks:
+  proxy:
+    external: true
+    name: proxy
