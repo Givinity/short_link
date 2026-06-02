@@ -1,5 +1,6 @@
-import { useState } from 'react'
-import { LinkIcon, Zap, Check, Copy, CheckCheck } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { LinkIcon, Zap, Check, Copy, CheckCheck, Download } from 'lucide-react'
+import { QRCodeCanvas } from 'qrcode.react'
 import { getUrlValidationError } from '../lib/validateUrl'
 
 interface ShortenResult {
@@ -13,6 +14,7 @@ export default function Hero() {
   const [result, setResult] = useState<ShortenResult | null>(null)
   const [error, setError] = useState('')
   const [copied, setCopied] = useState(false)
+  const qrWrapperRef = useRef<HTMLDivElement | null>(null)
 
   async function handleShorten() {
     const trimmed = url.trim()
@@ -56,6 +58,19 @@ export default function Hero() {
     await navigator.clipboard.writeText(`${window.location.origin}/${result.shortLink}`)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  function handleDownloadQr() {
+    if (!result || !qrWrapperRef.current) return
+
+    const canvas = qrWrapperRef.current.querySelector('canvas')
+    if (!canvas) return
+
+    const url = canvas.toDataURL('image/png')
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `shortlink-${result.shortLink}.png`
+    link.click()
   }
 
   const shortUrl = result
@@ -141,13 +156,33 @@ export default function Hero() {
             </span>
           </div>
         </div>
-        <button
-          onClick={result ? handleCopy : undefined}
-          className="flex items-center gap-1.5 bg-divider text-fg-secondary text-[13px] font-medium px-4 py-2 rounded-design-lg hover:bg-[#3f3f46] transition-colors shrink-0 self-end md:self-auto"
-        >
-          {copied ? <CheckCheck size={14} className="text-green-dot" /> : <Copy size={14} />}
-          {copied ? 'Copied!' : 'Copy'}
-        </button>
+        <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+          {result && (
+            <div
+              ref={qrWrapperRef}
+              className="p-2 rounded-design-lg bg-white shrink-0"
+              aria-label="QR code for short link"
+            >
+              <QRCodeCanvas value={shortUrl} size={72} includeMargin />
+            </div>
+          )}
+          <div className="flex items-center gap-2 self-end md:self-auto">
+            <button
+              onClick={result ? handleDownloadQr : undefined}
+              className="flex items-center gap-1.5 bg-divider text-fg-secondary text-[13px] font-medium px-4 py-2 rounded-design-lg hover:bg-[#3f3f46] transition-colors shrink-0"
+            >
+              <Download size={14} />
+              QR
+            </button>
+            <button
+              onClick={result ? handleCopy : undefined}
+              className="flex items-center gap-1.5 bg-divider text-fg-secondary text-[13px] font-medium px-4 py-2 rounded-design-lg hover:bg-[#3f3f46] transition-colors shrink-0"
+            >
+              {copied ? <CheckCheck size={14} className="text-green-dot" /> : <Copy size={14} />}
+              {copied ? 'Copied!' : 'Copy'}
+            </button>
+          </div>
+        </div>
       </div>
     </section>
   )
